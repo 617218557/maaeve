@@ -1,3 +1,6 @@
+from maa.toolkit import Toolkit
+Toolkit.init_option('./')
+
 import sys
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
@@ -20,7 +23,7 @@ def main():
     window.show()
 
     # 运行应用
-    sys.exit(app.exec())
+    app.exec()
 
 if __name__ == "__main__":
     main()

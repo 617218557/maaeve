@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout
+from PyQt6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget
 
 from app.script.device_utils import find_devices
@@ -7,8 +7,9 @@ from app.script.storage import save_device
 
 
 class HomeInterface(ScrollArea):
+
     def __init__(self, parent=None):
-        super().__init__(parent=parent)
+        super().__init__(parent)
         # 设备列表
         self.device_list = None
         # 添加设备按钮
@@ -16,17 +17,16 @@ class HomeInterface(ScrollArea):
         # 选中的item
         self.select_device = None
 
-        self.setObjectName("配置页面")
-        self.view = FluentWidget(self)
+        self.view = QWidget(self)
+        self.parent_layout = QVBoxLayout(self.view)
         self.setWidget(self.view)
         self.setWidgetResizable(True)
-        self.init_ui()
+        self.parent_layout.setSpacing(20)
+        self.parent_layout.setContentsMargins(36, 20, 36, 36)
+        self.setObjectName('配置页面')
+        self._create_title_section()
 
-    def init_ui(self):
-        root_layout = QVBoxLayout(self.view)
-        root_layout.setSpacing(20)
-        root_layout.setContentsMargins(40, 40, 40, 40)
-
+    def _create_title_section(self):
         device_layout = QHBoxLayout()
         # 查模拟器
         sync_devices_btn = PushButton(FluentIcon.SYNC, '刷新设备')
@@ -41,10 +41,10 @@ class HomeInterface(ScrollArea):
         self.add_devices_btn.clicked.connect(self.add_device)
         device_layout.addWidget(self.add_devices_btn)
         device_layout.addStretch(1)
-        root_layout.addLayout(device_layout)
+        self.parent_layout.addLayout(device_layout)
 
         # 设备列表
-        device_list_card = CardWidget(self.view)
+        device_list_card = CardWidget()
         device_list_layout = QVBoxLayout(device_list_card)
         device_list_layout.setContentsMargins(0, 10, 0, 10)
         self.device_list = ListWidget(device_list_card)
@@ -52,10 +52,9 @@ class HomeInterface(ScrollArea):
         self.device_list.itemClicked.connect(self.on_list_selection_changed)
 
         device_list_layout.addWidget(self.device_list)
-        root_layout.addWidget(device_list_card)
+        self.parent_layout.addWidget(device_list_card)
 
-
-        root_layout.addStretch(1)
+        self.parent_layout.addStretch(1)
 
     def on_sync_devices_clicked(self):
         devices = find_devices()
