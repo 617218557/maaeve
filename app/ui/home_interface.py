@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget
 
 from app.script.device_utils import find_devices
+from app.script.storage import save_device
 
 
 class HomeInterface(ScrollArea):
@@ -33,8 +34,8 @@ class HomeInterface(ScrollArea):
         sync_devices_btn.clicked.connect(self.on_sync_devices_clicked)
         device_layout.addWidget(sync_devices_btn)
 
-        #添加模拟器
-        self.add_devices_btn = PushButton(FluentIcon.SYNC, '添加设备')
+        # 添加模拟器
+        self.add_devices_btn = PushButton(FluentIcon.ADD, '添加设备')
         self.add_devices_btn.setFixedSize(120, 40)
         self.add_devices_btn.setEnabled(False)
         self.add_devices_btn.clicked.connect(self.add_device)
@@ -42,7 +43,7 @@ class HomeInterface(ScrollArea):
         device_layout.addStretch(1)
         root_layout.addLayout(device_layout)
 
-        #设备列表
+        # 设备列表
         device_list_card = CardWidget(self.view)
         device_list_layout = QVBoxLayout(device_list_card)
         device_list_layout.setContentsMargins(0, 10, 0, 10)
@@ -60,6 +61,7 @@ class HomeInterface(ScrollArea):
         devices = find_devices()
         self.device_list.clear()
         self.select_device = None
+        self.add_devices_btn.setEnabled(False)
         for device in devices:
             self.device_list.addItem(device.name + '    ' + device.address)
             self.device_list.item(self.device_list.count() - 1).setData(Qt.ItemDataRole.UserRole, device)
@@ -67,6 +69,7 @@ class HomeInterface(ScrollArea):
     def on_list_selection_changed(self, item):
         selected_device = item.data(Qt.ItemDataRole.UserRole)
         if not selected_device:
+            self.add_devices_btn.setEnabled(False)
             return
         self.select_device = selected_device
         self.add_devices_btn.setEnabled(True)
@@ -75,4 +78,9 @@ class HomeInterface(ScrollArea):
         if not self.select_device:
             return
         print(f"\n执行添加逻辑：")
-        print(f"添加设备 - 名称：{ self.select_device.name}，地址：{self.select_device.address}")
+        print(f"添加设备 - 名称：{self.select_device.name}，地址：{self.select_device.address}")
+        # 保存设备到存储
+        if save_device(self.select_device):
+            print(f"设备保存成功")
+        else:
+            print(f"设备已存在或保存失败")
