@@ -1,7 +1,9 @@
 from PyQt6.QtGui import QIcon
 from qfluentwidgets import FluentWindow, NavigationItemPosition, NavigationWidget
 from qfluentwidgets import FluentIcon as FIF
-from app.ui.home_interface import HomeInterface
+from app.ui.sync_device_interface import SyncDeviceInterface
+from app.ui.monitor_interface import MonitorInterface
+
 
 
 class MainWindow(FluentWindow):
@@ -12,10 +14,12 @@ class MainWindow(FluentWindow):
         self.resize(1200, 800)
 
         # 初始化子界面
-        self.homeInterface = HomeInterface(self)
+        self.syncDeviceInterface = SyncDeviceInterface(self)
+        self.monitorInterface = MonitorInterface(self)
 
         # 初始化导航栏
         self.init_navigation()
 
     def init_navigation(self):
-        self.addSubInterface(self.homeInterface,FIF.HOME,"配置页面", NavigationItemPosition.TOP)
+        self.addSubInterface(self.syncDeviceInterface, FIF.ADD,"扫描设备", NavigationItemPosition.TOP)
+        self.addSubInterface(self.monitorInterface, FIF.PLAY, "开始", NavigationItemPosition.TOP)

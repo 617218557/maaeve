@@ -1,12 +1,12 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
-from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget
+from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme
 
 from app.script.device_utils import find_devices
 from app.script.storage import save_device
 
-
-class HomeInterface(ScrollArea):
+# 扫描设备
+class SyncDeviceInterface(ScrollArea):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -21,12 +21,16 @@ class HomeInterface(ScrollArea):
         self.parent_layout = QVBoxLayout(self.view)
         self.setWidget(self.view)
         self.setWidgetResizable(True)
+        # 设置透明背景
+        self.setStyleSheet("QScrollArea { border: none; background: transparent; }")
+        self.viewport().setStyleSheet("background: transparent;")
+        self.view.setStyleSheet("background: transparent;")
         self.parent_layout.setSpacing(20)
         self.parent_layout.setContentsMargins(36, 20, 36, 36)
         self.setObjectName('配置页面')
-        self._create_title_section()
+        self.create_item_view()
 
-    def _create_title_section(self):
+    def create_item_view(self):
         device_layout = QHBoxLayout()
         # 查模拟器
         sync_devices_btn = PushButton(FluentIcon.SYNC, '刷新设备')
