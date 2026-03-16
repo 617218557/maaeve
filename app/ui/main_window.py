@@ -1,4 +1,4 @@
-from PyQt6.QtGui import QIcon
+from PySide6.QtGui import QIcon
 from qfluentwidgets import FluentWindow, NavigationItemPosition, NavigationWidget
 from qfluentwidgets import FluentIcon as FIF
 from app.ui.sync_device_interface import SyncDeviceInterface

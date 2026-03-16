@@ -1,17 +1,15 @@
 from maa.toolkit import Toolkit
-Toolkit.init_option('./')
 
+from PySide6.QtWidgets import (
+    QApplication,
+)
 import sys
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt
 from app.ui.main_window import MainWindow
 from qfluentwidgets import setTheme, Theme
 
 
 def main():
-    # 启用高DPI支持
-    QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
-
+    Toolkit.init_option("./")
     # 创建应用实例
     app = QApplication(sys.argv)
     app.setApplicationName("mma eve")

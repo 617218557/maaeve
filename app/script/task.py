@@ -1,11 +1,10 @@
 import os
 import time
-
-from PyQt6.QtCore import QThread, pyqtSignal
-
 import cv2
 import numpy as np
 import random
+
+from PyQt6.QtCore import QThread, pyqtSignal
 
 from app.script.device_utils import connect_device
 
@@ -14,6 +13,32 @@ RESOURCE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.p
                             'icons')
 # 匹配阈值
 TEMPLATE_THRESHOLD = 0.9
+
+kernel = np.ones((2, 2), np.uint8)
+img1 = cv2.imread(RESOURCE_DIR + '/1.png')
+img1_grey = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+# img1_thresh = cv2.threshold(img1_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# self.img1_thresh = cv2.dilate(self.img1_thresh, kernel, iterations=1)
+
+img2 = cv2.imread(RESOURCE_DIR + '/2.png')
+img2_grey = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+# img2_thresh = cv2.threshold(img2_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# self.img2_thresh = cv2.dilate(self.img2_thresh, kernel, iterations=1)
+
+img3 = cv2.imread(RESOURCE_DIR + '/3.png')
+img3_grey = cv2.cvtColor(img3, cv2.COLOR_BGR2GRAY)
+# img3_thresh = cv2.threshold(img3_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# self.img3_thresh = cv2.dilate(self.img3_thresh, kernel, iterations=1)
+
+img_overview = cv2.imread(RESOURCE_DIR + '/overview.png')
+img_overview_grey = cv2.cvtColor(img_overview, cv2.COLOR_BGR2GRAY)
+img_overview_thresh = cv2.threshold(img_overview_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# self.img_overview_thresh = cv2.dilate(self.img_overview_thresh, kernel, iterations=1)
+
+img_visitor = cv2.imread(RESOURCE_DIR + '/visitor.png')
+img_visitor_grey = cv2.cvtColor(img_visitor, cv2.COLOR_BGR2GRAY)
+img_visitor_thresh = cv2.threshold(img_visitor_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# self.img_visitor_thresh = cv2.dilate(self.img_visitor_thresh, kernel, iterations=1)
 
 class DeviceTaskThread(QThread):
     """设备任务线程"""
@@ -25,33 +50,6 @@ class DeviceTaskThread(QThread):
         super().__init__()
         self.device = device
         self._is_stopped = False
-
-        kernel = np.ones((2, 2), np.uint8)
-
-        img1 = cv2.imread(RESOURCE_DIR + '/1.png')
-        img1_grey = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-        self.img1_thresh = cv2.threshold(img1_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        # self.img1_thresh = cv2.dilate(self.img1_thresh, kernel, iterations=1)
-
-        img2 = cv2.imread(RESOURCE_DIR + '/2.png')
-        img2_grey = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-        self.img2_thresh = cv2.threshold(img2_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        # self.img2_thresh = cv2.dilate(self.img2_thresh, kernel, iterations=1)
-
-        img3 = cv2.imread(RESOURCE_DIR + '/3.png')
-        img3_grey = cv2.cvtColor(img3, cv2.COLOR_BGR2GRAY)
-        self.img3_thresh = cv2.threshold(img3_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        # self.img3_thresh = cv2.dilate(self.img3_thresh, kernel, iterations=1)
-
-        img_overview = cv2.imread(RESOURCE_DIR + '/overview.png')
-        img_overview_grey = cv2.cvtColor(img_overview, cv2.COLOR_BGR2GRAY)
-        self.img_overview_thresh = cv2.threshold(img_overview_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        # self.img_overview_thresh = cv2.dilate(self.img_overview_thresh, kernel, iterations=1)
-
-        img_visitor = cv2.imread(RESOURCE_DIR + '/visitor.png')
-        img_visitor_grey = cv2.cvtColor(img_visitor, cv2.COLOR_BGR2GRAY)
-        self.img_visitor_thresh = cv2.threshold(img_visitor_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-        # self.img_visitor_thresh = cv2.dilate(self.img_visitor_thresh, kernel, iterations=1)
 
     def stop(self):
         """停止任务"""
@@ -103,7 +101,7 @@ def click_at(controller, location):
     offset_y = random.randint(-10, 10)
     controller.post_click(x + offset_x, y + offset_y).wait()
 
-def run_battle_ship(self, controller):
+def run_battle_ship(controller):
     #导航 左侧导航
     #self.d.click(30 + ran, 200 + ran)
     #右侧军堡
@@ -113,27 +111,33 @@ def run_battle_ship(self, controller):
     time.sleep(1.5)
 
 
-def battle(self, controller):
+def battle(controller):
     """
     执行战斗任务
     :return: True 如果任意一个图片没识别到
     """
     # 截图
-    img_main = controller.post_screencap().wait()
+    controller.post_screencap().get(True)
+    img_main = controller.cached_image
     img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
     img_main_thresh = cv2.threshold(img_main_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-    res1 = match_template(img_main_thresh, self.img1_thresh)
-    res2 = match_template(img_main_thresh, self.img2_thresh)
-    res3 = match_template(img_main_thresh, self.img3_thresh)
+    res1 = match_template(img_main_grey, img1_grey)
+    res2 = match_template(img_main_grey, img2_grey)
+    res3 = match_template(img_main_grey, img3_grey)
+    res4 = match_template(img_main_thresh, img_overview_thresh)
+    res5 = match_template(img_main_thresh, img_visitor_thresh)
 
     print(res1)
     print(res2)
     print(res3)
+    print(res4)
+    print(res5)
 
     # 打开总览
-    loc_over_view = match_template(img_main_thresh, self.img_overview_thresh)
-    click_at(self, loc_over_view)
+    loc_over_view = match_template(img_main_thresh, img_overview_thresh)
+    if loc_over_view is not None:
+        click_at(controller, loc_over_view)
 
-    run_battle_ship(self, controller)
+    run_battle_ship(controller)
     return False

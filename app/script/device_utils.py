@@ -1,4 +1,3 @@
-from maa.define import MaaAdbScreencapMethodEnum
 from maa.toolkit import Toolkit
 from maa.controller import AdbController
 import random
