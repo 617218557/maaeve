@@ -4,6 +4,7 @@ from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, Tit
 from app.script.storage import get_devices, delete_device
 from app.script.device_utils import find_devices
 from app.script.task import DeviceTaskThread
+from app.script.utils import log
 
 
 # 监控脚本运行
@@ -57,13 +58,13 @@ class MonitorInterface(ScrollArea):
 
     def add_device_item(self, device):
         """添加设备项"""
-        address = device.get('address')
+        address = device.address
         item_widget = QWidget()
         item_layout = QHBoxLayout(item_widget)
         item_layout.setContentsMargins(10, 5, 10, 5)
 
         # 设备名称
-        name_label = BodyLabel(device.get('name', ''), item_widget)
+        name_label = BodyLabel(device.name, item_widget)
         name_label.setMinimumWidth(200)
         item_layout.addWidget(name_label)
 
@@ -89,24 +90,24 @@ class MonitorInterface(ScrollArea):
 
     def on_toggle_device(self, device, button):
         """切换设备启动/停止状态"""
-        address = device.get('address')
+        address = device.address
         start_btn, delete_btn = self.device_buttons.get(address, (button, button))
 
         # 停止设备
         if address in self.device_threads and self.device_threads[address].isRunning():
-            self._stop_thread(address, start_btn, delete_btn, device.get('name'))
+            self._stop_thread(device, start_btn, delete_btn)
             return
 
         # 启动设备
         target_device = next((d for d in find_devices() if d.address == address), None)
         if not target_device:
-            print(f"未找到设备: {device.get('name')}")
+            log(message="未找到设备", device=device, is_important=True)
             return
 
         thread = DeviceTaskThread(target_device)
-        thread.finished.connect(lambda msg, addr=address: self._on_task_callback(addr, msg))
-        thread.error.connect(lambda msg, addr=address: self._on_task_callback(addr, msg))
-        thread.stopped.connect(lambda msg, addr=address: self._on_task_callback(addr, msg))
+        thread.finished.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
+        thread.error.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
+        thread.stopped.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
 
         self.device_threads[address] = thread
         thread.start()
@@ -116,11 +117,12 @@ class MonitorInterface(ScrollArea):
         button.setIcon(FluentIcon.CLOSE)
         delete_btn.setEnabled(False)
 
-        print(f"正在启动设备: {device.get('name')} - {address}")
+        log(message="正在启动设备", device=target_device, is_important=True)
 
-    def _on_task_callback(self, address, message):
+    def _on_task_callback(self, device, message):
         """任务回调处理"""
-        print(message)
+        log(message=message, device=device, is_important=True)
+        address = device.address
         if address not in self.device_buttons:
             return
         start_btn, delete_btn = self.device_buttons[address]
@@ -128,8 +130,9 @@ class MonitorInterface(ScrollArea):
         if address in self.device_threads:
             del self.device_threads[address]
 
-    def _stop_thread(self, address, start_btn, delete_btn, device_name):
+    def _stop_thread(self, device, start_btn, delete_btn):
         """停止线程"""
+        address = device.address
         thread = self.device_threads.get(address)
         if thread:
             thread.stop()
@@ -139,7 +142,7 @@ class MonitorInterface(ScrollArea):
             if address in self.device_threads:
                 del self.device_threads[address]
         self._reset_buttons(start_btn, delete_btn)
-        print(f"设备 {device_name} 已停止")
+        log(message="已停止", device=device, is_important=True)
 
     def _reset_buttons(self, start_btn, delete_btn):
         """重置按钮状态"""
@@ -151,15 +154,15 @@ class MonitorInterface(ScrollArea):
 
     def on_delete_device(self, device):
         """删除设备"""
-        address = device.get('address')
+        address = device.address
         start_btn, delete_btn = self.device_buttons.get(address, (None, None))
 
         # 如果设备正在运行，先停止
         if address in self.device_threads and self.device_threads[address].isRunning():
-            self._stop_thread(address, start_btn, delete_btn, device.get('name'))
+            self._stop_thread(device, start_btn, delete_btn)
 
-        if delete_device(address):
-            print(f"删除设备成功: {device.get('name')}")
+        if delete_device(device):
+            log(message="删除设备成功", device=device, is_important=True)
             self.on_refresh_devices()
         else:
-            print(f"删除设备失败: {device.get('name')}")
+            log(message="删除设备失败", device=device, is_important=True)

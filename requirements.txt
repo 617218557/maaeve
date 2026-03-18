@@ -1,5 +1,4 @@
 pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
 pip install maafw
-
-numpy
-opencv-python
+pip install opencv-python
+pip install numpy

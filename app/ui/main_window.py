@@ -10,7 +10,7 @@ class MainWindow(FluentWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("eve 自动化")
-        self.setWindowIcon(QIcon("assets/icons/app_icon.png"))
+        self.setWindowIcon(QIcon("assets/image/app_icon.png"))
         self.resize(1200, 800)
 
         # 初始化子界面

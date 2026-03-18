@@ -1,0 +1,19 @@
+{
+    "SettingEntry": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [
+                    0,
+                    0,
+                    4000,
+                    4000
+                ],
+                "expected": "我的设备"
+            }
+        },
+        "action": {
+            "type": "Click"
+        }
+    }
+}

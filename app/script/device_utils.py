@@ -1,4 +1,4 @@
-from maa.toolkit import Toolkit
+from maa.toolkit import Toolkit, AdbDevice
 from maa.controller import AdbController
 import random
 
@@ -7,7 +7,7 @@ def find_devices():
     return adb_devices
 
 
-def connect_device(device):
+def connect_device(device: AdbDevice):
     """连接设备"""
     controller = AdbController(
         adb_path=device.adb_path,
