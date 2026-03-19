@@ -4,7 +4,7 @@ import time
 import random
 import numpy as np
 from maa.toolkit import AdbDevice
-from app.script.utils import log, play_warn
+from app.script.utils import play_warn
 
 
 
@@ -104,7 +104,7 @@ def battle(controller, device: AdbDevice):
     # res5 = match_template(img_main_thresh, img_visitor_thresh)
 
     if is_in_station(img_main_thresh):
-        log("蹲站中", device, True)
+        # log("蹲站中", device, True)
         time.sleep(30)
         return False
 
@@ -115,7 +115,7 @@ def battle(controller, device: AdbDevice):
         time.sleep(2)
 
     if res1 is None or res2 is None or res3 is None:
-        log("跑路", device, True)
+        # log("跑路", device, True)
         play_warn()
         run_battle_ship(controller)
         time.sleep(3)

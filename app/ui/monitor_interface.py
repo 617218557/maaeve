@@ -1,16 +1,15 @@
-import time
+import logging
 
-from PySide6.QtGui import QTextCursor
-from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget, QTextEdit
-from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
+from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme, TextEdit
 
+from app.script.log import LogForwarder, append_colored_log
 from app.script.storage import get_devices, delete_device
 from app.script.device_utils import find_devices
 from app.script.task import DeviceTaskThread
-from app.script.utils import log
+from app.script.log import QtLogHandler
 
 
-# 监控脚本运行
 class MonitorInterface(ScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -18,6 +17,13 @@ class MonitorInterface(ScrollArea):
         self.device_threads = {}  # {address: thread}
         self.device_buttons = {}  # {address: (start_btn, delete_btn)}
         self.device_list_widget = None
+
+        # 日志转发器
+        self.log_forwarder = LogForwarder()
+        self.log_forwarder.log_signal.connect(lambda msg, lvl: append_colored_log(self.log_view, msg, lvl))
+
+        # 设置 MAA 日志处理器
+        self._setup_maa_logger()
 
         self.view = QWidget(self)
         self.parent_layout = QVBoxLayout(self.view)
@@ -30,6 +36,28 @@ class MonitorInterface(ScrollArea):
         self.parent_layout.setContentsMargins(36, 20, 36, 36)
         self.setObjectName('monitorInterface')
         self.create_item_view()
+
+    def _setup_maa_logger(self):
+        """设置 MAA 日志处理器"""
+        # 使用 root logger 捕获所有日志
+        root_logger = logging.getLogger()
+        root_logger.setLevel(logging.DEBUG)
+
+        # 确保子 logger 可以传播到 root logger
+        logging.getLogger().setLevel(logging.DEBUG)
+
+        # 创建自定义 handler
+        handler = QtLogHandler(self._on_maa_log)
+        handler.setLevel(logging.DEBUG)
+        handler.setFormatter(logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
+
+        # 添加 handler 到 root logger
+        if not any(isinstance(h, QtLogHandler) for h in root_logger.handlers):
+            root_logger.addHandler(handler)
+
+    def _on_maa_log(self, message, level):
+        """MAA 日志回调 - 转发到主线程"""
+        append_colored_log(self.log_view, message, level)
 
     def create_item_view(self):
         # 刷新按钮
@@ -49,7 +77,7 @@ class MonitorInterface(ScrollArea):
         self.parent_layout.addWidget(device_list_card)
 
         # 日志框
-        self.log_view = QTextEdit()
+        self.log_view = TextEdit()
         self.log_view.setReadOnly(True)
         self.log_view.setStyleSheet("""
                     QTextEdit {
@@ -119,7 +147,7 @@ class MonitorInterface(ScrollArea):
         # 启动设备
         target_device = next((d for d in find_devices() if d.address == address), None)
         if not target_device:
-            log(message="未找到设备", device=device, is_important=True)
+            append_colored_log(self.log_view, "未找到设备", "ERROR", device)
             return
 
         thread = DeviceTaskThread(target_device)
@@ -135,11 +163,11 @@ class MonitorInterface(ScrollArea):
         button.setIcon(FluentIcon.CLOSE)
         delete_btn.setEnabled(False)
 
-        log(message="正在启动设备", device=target_device, is_important=True)
+        append_colored_log(self.log_view, "正在启动设备", "SYSTEM", target_device)
 
     def _on_task_callback(self, device, message):
         """任务回调处理"""
-        log(message=message, device=device, is_important=True)
+        append_colored_log(self.log_view, message, "INFO", device)
         address = device.address
         if address not in self.device_buttons:
             return
@@ -160,7 +188,7 @@ class MonitorInterface(ScrollArea):
             if address in self.device_threads:
                 del self.device_threads[address]
         self._reset_buttons(start_btn, delete_btn)
-        log(message="已停止", device=device, is_important=True)
+        append_colored_log(self.log_view, "已停止", "SYSTEM", device)
 
     def _reset_buttons(self, start_btn, delete_btn):
         """重置按钮状态"""
@@ -180,29 +208,7 @@ class MonitorInterface(ScrollArea):
             self._stop_thread(device, start_btn, delete_btn)
 
         if delete_device(device):
-            log(message="删除设备成功", device=device, is_important=True)
+            append_colored_log(self.log_view, "删除设备成功", "SYSTEM", device)
             self.on_refresh_devices()
         else:
-            log(message="删除设备失败", device=device, is_important=True)
-
-    def append_colored_log(self, text, level):
-        # 时间戳
-        now = time.strftime("%H:%M:%S")
-        log = f"[{now}] {text}"
-
-        # 颜色配置
-        color_map = {
-            "INFO": "#A6E3A1",  # 绿
-            "SYSTEM": "#89B4FA",  # 蓝
-            "ERROR": "#F38BA8",  # 红
-            "WARN": "#F9C267"  # 黄
-        }
-        color = color_map.get(level, "#FFFFFF")
-
-        # 富文本插入
-        self.log_view.append(f'<span style="color:{color};">{log}</span>')
-
-        # 自动滚动到底部
-        cursor = self.log_view.textCursor()
-        cursor.movePosition(QTextCursor.MoveOperation.End)
-        self.log_view.setTextCursor(cursor)
+            append_colored_log(self.log_view, "删除设备失败", "ERROR", device)

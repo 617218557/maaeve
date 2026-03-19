@@ -11,18 +11,6 @@ from app.script.constants import DEBUG_MODE
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'assets')
 SOUND_DIR = os.path.join(RESOURCE_DIR, 'sound')
 
-def log(message: str, device: AdbDevice, is_important=False):
-    """统一的日志输出方法
-    :param device: 设备信息
-    :param message: 日志消息
-    :param is_important: 是否为重要日志(即使调试关闭也会显示)
-    """
-    if DEBUG_MODE or is_important:
-         # 获取当前时间戳
-        timestamp = time.strftime("%H:%M:%S")
-        print(f'[{timestamp}] {device.name}: {message}')
-
-
 def play_sound(sound_file):
     """
     播放音频文件
