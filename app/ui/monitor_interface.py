@@ -1,4 +1,7 @@
-from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
+import time
+
+from PySide6.QtGui import QTextCursor
+from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget, QTextEdit
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme
 
 from app.script.storage import get_devices, delete_device
@@ -11,6 +14,7 @@ from app.script.utils import log
 class MonitorInterface(ScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self.log_view = None
         self.device_threads = {}  # {address: thread}
         self.device_buttons = {}  # {address: (start_btn, delete_btn)}
         self.device_list_widget = None
@@ -42,8 +46,22 @@ class MonitorInterface(ScrollArea):
         self.device_list_widget = ListWidget(device_list_card)
         self.device_list_widget.setFixedHeight(400)
         device_list_layout.addWidget(self.device_list_widget)
-
         self.parent_layout.addWidget(device_list_card)
+
+        # 日志框
+        self.log_view = QTextEdit()
+        self.log_view.setReadOnly(True)
+        self.log_view.setStyleSheet("""
+                    QTextEdit {
+                        background-color: transparent;
+                        color: white;
+                        font-size: 14px;
+                        border-radius: 6px;
+                        padding: 8px;
+                    }
+                """)
+        self.parent_layout.addWidget(self.log_view)
+
         self.parent_layout.addStretch(1)
 
         self.on_refresh_devices()
@@ -166,3 +184,25 @@ class MonitorInterface(ScrollArea):
             self.on_refresh_devices()
         else:
             log(message="删除设备失败", device=device, is_important=True)
+
+    def append_colored_log(self, text, level):
+        # 时间戳
+        now = time.strftime("%H:%M:%S")
+        log = f"[{now}] {text}"
+
+        # 颜色配置
+        color_map = {
+            "INFO": "#A6E3A1",  # 绿
+            "SYSTEM": "#89B4FA",  # 蓝
+            "ERROR": "#F38BA8",  # 红
+            "WARN": "#F9C267"  # 黄
+        }
+        color = color_map.get(level, "#FFFFFF")
+
+        # 富文本插入
+        self.log_view.append(f'<span style="color:{color};">{log}</span>')
+
+        # 自动滚动到底部
+        cursor = self.log_view.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+        self.log_view.setTextCursor(cursor)
