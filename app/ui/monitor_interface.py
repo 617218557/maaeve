@@ -3,7 +3,7 @@ import logging
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme, TextEdit
 
-from app.script.log import LogForwarder, append_colored_log
+from app.script.log import append_colored_log
 from app.script.storage import get_devices, delete_device
 from app.script.device_utils import find_devices
 from app.script.task import DeviceTaskThread
@@ -18,12 +18,8 @@ class MonitorInterface(ScrollArea):
         self.device_buttons = {}  # {address: (start_btn, delete_btn)}
         self.device_list_widget = None
 
-        # 日志转发器
-        self.log_forwarder = LogForwarder()
-        self.log_forwarder.log_signal.connect(lambda msg, lvl: append_colored_log(self.log_view, msg, lvl))
-
-        # 设置 MAA 日志处理器
-        self._setup_maa_logger()
+        # 接入系统日志
+        self._setup_system_logger()
 
         self.view = QWidget(self)
         self.parent_layout = QVBoxLayout(self.view)
@@ -37,7 +33,7 @@ class MonitorInterface(ScrollArea):
         self.setObjectName('monitorInterface')
         self.create_item_view()
 
-    def _setup_maa_logger(self):
+    def _setup_system_logger(self):
         """设置 MAA 日志处理器"""
         # 使用 root logger 捕获所有日志
         root_logger = logging.getLogger()

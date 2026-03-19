@@ -2,18 +2,43 @@ import logging
 import time
 from typing import Optional
 from PySide6.QtGui import QTextCursor
-from PySide6.QtCore import QObject, Signal
+from maa.controller import ControllerEventSink, Controller
+from maa.event_sink import NotificationType
+from maa.tasker import TaskerEventSink, Tasker
 from maa.toolkit import AdbDevice
 from qfluentwidgets import TextEdit
 
 
-# 日志转发器 - 用于跨线程日志传递
-class LogForwarder(QObject):
-    log_signal = Signal(str, str)  # (message, level)
+class MaaControllerEventSink(ControllerEventSink):
+    def __init__(self, device: AdbDevice):
+        self.device = device
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def on_raw_notification(self, controller: Controller, msg: str, details: dict):
+        pass
 
+    def on_controller_action(
+        self,
+        controller: Controller,
+        noti_type: NotificationType,
+        detail: ControllerEventSink.ControllerActionDetail,
+    ):
+        logging.getLogger().info(f"[{self.device.name}] {detail.info}")
+
+
+class MaaTaskerEventSink(TaskerEventSink):
+    def __init__(self, device: AdbDevice):
+        self.device = device
+
+    def on_raw_notification(self, tasker: Tasker, msg: str, details: dict):
+        pass
+
+    def on_tasker_task(
+        self,
+        tasker: Tasker,
+        noti_type: NotificationType,
+        detail: TaskerEventSink.TaskerTaskDetail,
+    ):
+        logging.getLogger().info(f"[{self.device.name}] {detail.task_id} - {detail.entry}")
 
 class QtLogHandler(logging.Handler):
     """自定义日志处理器，将日志发送到 PyQt 信号"""

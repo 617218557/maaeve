@@ -7,6 +7,7 @@ from maa.context import Context, Tasker
 from maa.toolkit import AdbDevice
 
 from app.script.device_utils import connect_device
+from app.script.log import MaaTaskerEventSink, MaaControllerEventSink
 from app.script.task_maa import start_maa_task
 
 class DeviceTaskThread(QThread):
@@ -39,6 +40,8 @@ class DeviceTaskThread(QThread):
             res_job.wait()
 
             tasker = Tasker()
+            tasker.add_sink(MaaTaskerEventSink(self.device))
+            tasker.add_sink(MaaControllerEventSink(self.device))
             tasker.bind(resource, controller)
 
             while not self._is_stopped:
