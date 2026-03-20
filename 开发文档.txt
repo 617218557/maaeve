@@ -1,3 +1,24 @@
 文档
 qt：https://qfluentwidgets.com/zh/pages/componentlist
 maaFramework：https://github.com/MaaXYZ/MaaFramework/blob/main/sample/python/demo1.py
+
+新增自定义逻辑
+"MergeAndOCR": {
+        "$__mpe_code": {
+            "position": {
+                "x": 301,
+                "y": 114
+            }
+        },
+        "next": [
+            "OCROnMerged"
+        ],
+        "recognition": {
+            "param": {
+                "custom_recognition": "RegionMergeRecognition"
+            },
+            "type": "Custom"
+        }
+    }
+
+     resource.register_custom_recognition("RegionMergeRecognition", RegionMergeRecognition())

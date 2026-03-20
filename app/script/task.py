@@ -6,6 +6,8 @@ from maa.context import Context, Tasker
 
 from maa.toolkit import AdbDevice
 
+from app.maascript.OutPutOrcResult import PrintOrcResult
+from app.maascript.RegionMergeRecognition import RegionMergeRecognition
 from app.script.device_utils import connect_device
 from app.script.log import MaaTaskerEventSink, MaaControllerEventSink
 from app.script.task_maa import start_maa_task
@@ -36,6 +38,9 @@ class DeviceTaskThread(QThread):
             # 加载资源
             resource = Resource()
             resource_path = "./assets/resource"
+            resource.register_custom_recognition("RegionMergeRecognition", RegionMergeRecognition())
+            resource.register_custom_recognition("OutPutOrcResult", PrintOrcResult())
+
             res_job = resource.post_bundle(resource_path)
             res_job.wait()
 

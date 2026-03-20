@@ -4,44 +4,128 @@
             "filePath": "/Users/fengyifei02/PycharmProjects/maaeve/assets/resource/pipeline/main.json",
             "filename": "新建Pipeline1",
             "isModifiedExternally": false,
-            "lastSyncTime": 1773890233175,
+            "lastSyncTime": 1773995647914,
             "prefix": "",
             "savedViewport": {
-                "x": -1381,
-                "y": -17,
-                "zoom": 1
+                "x": -279,
+                "y": 226,
+                "zoom": 1.5
             },
             "version": "v1.3.0"
         }
     },
-    "新建节点5": {
+    "FindThreeImages": {
         "$__mpe_code": {
             "position": {
-                "x": 272,
+                "x": -7,
+                "y": 0
+            }
+        },
+        "next": [
+            "MergeAndOCR"
+        ],
+        "on_error": [
+            "新建节点10"
+        ],
+        "recognition": {
+            "param": {
+                "all_of": [
+                    {
+                        "recognition": "TemplateMatch",
+                        "sub_name": "image1",
+                        "template": "1.png",
+                        "threshold": 0.7
+                    },
+                    {
+                        "recognition": "TemplateMatch",
+                        "sub_name": "image2",
+                        "template": "2.png",
+                        "threshold": 0.7
+                    },
+                    {
+                        "recognition": "TemplateMatch",
+                        "sub_name": "image3",
+                        "template": "3.png",
+                        "threshold": 0.7
+                    }
+                ]
+            },
+            "type": "And"
+        },
+        "timeout": 1000
+    },
+    "MergeAndOCR": {
+        "$__mpe_code": {
+            "position": {
+                "x": 301,
+                "y": 114
+            }
+        },
+        "next": [
+            "OCROnMerged"
+        ],
+        "recognition": {
+            "param": {
+                "custom_recognition": "RegionMergeRecognition"
+            },
+            "type": "Custom"
+        }
+    },
+    "OCROnMerged": {
+        "$__mpe_code": {
+            "position": {
+                "x": 652,
                 "y": 12
+            }
+        },
+        "next": [
+            "PrintOrcResult"
+        ],
+        "on_error": [
+            "新建节点10"
+        ],
+        "recognition": {
+            "param": {
+                "expected": [
+                    "[0-9]+"
+                ],
+                "roi": "MergeAndOCR",
+                "threshold": 0.6
+            },
+            "type": "OCR"
+        }
+    },
+    "PrintOrcResult": {
+        "$__mpe_code": {
+            "position": {
+                "x": 301,
+                "y": 114
+            }
+        },
+        "recognition": {
+            "param": {
+                "custom_recognition": "OutPutOrcResult"
+            },
+            "type": "Custom"
+        }
+    },
+    "新建节点10": {
+        "$__mpe_code": {
+            "position": {
+                "x": 289,
+                "y": 309
             }
         },
         "action": {
             "param": {
                 "target": [
-                    0,
-                    0,
-                    0,
-                    0
+                    95,
+                    26,
+                    40,
+                    29
                 ]
             },
             "type": "Click"
-        },
-        "recognition": {
-            "param": {
-                "expected": [
-                    "我的设备"
-                ]
-            },
-            "type": "OCR"
-        },
-         "focus": {
-            "log": "正在识别画面……"
         }
     }
 }

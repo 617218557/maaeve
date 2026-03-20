@@ -9,7 +9,7 @@ logger = logging.getLogger()
 
 def start_maa_task(controller: Controller, tasker: Tasker):
     task_entry = [
-        "新建节点5",
+        "FindThreeImages",
     ]
     pipeline_override = {
 
