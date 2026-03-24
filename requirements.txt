@@ -2,3 +2,4 @@ pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
 pip install maafw
 pip install opencv-python
 pip install numpy
+pip install pygame

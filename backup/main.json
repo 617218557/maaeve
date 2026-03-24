@@ -1,0 +1,247 @@
+{
+  "$__mpe_config_新建Pipeline1": {
+    "$__mpe_code": {
+      "prefix": "",
+      "savedViewport": {
+        "x": 83,
+        "y": 217,
+        "zoom": 0.76
+      },
+      "filename": "新建Pipeline1",
+      "version": "v1.3.0"
+    }
+  },
+  "安全": {
+    "$__mpe_code": {
+      "position": {
+        "x": 1262,
+        "y": 11
+      }
+    }
+  },
+  "开始": {
+    "post_delay": 1000,
+    "next": [
+      "检测没蹲站"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": -231,
+        "y": 183
+      }
+    }
+  },
+  "打开总览": {
+    "pre_delay": 0,
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "OpenOverView",
+        "custom_action_param": "",
+        "target": "识别总览"
+      }
+    },
+    "post_delay": 300,
+    "next": [
+      "检测红白"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 668,
+        "y": -42
+      }
+    }
+  },
+  "检测红白": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {
+        "template": [
+          "1.png",
+          "2.png",
+          "3.png"
+        ],
+        "threshold": [
+          0.9,
+          0.9,
+          0.9
+        ]
+      }
+    },
+    "timeout": 3000,
+    "next": [
+      "安全"
+    ],
+    "on_error": [
+      "跑路-点击军堡"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 937,
+        "y": 282
+      }
+    }
+  },
+  "检测没蹲站": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          1063,
+          658,
+          80,
+          53
+        ],
+        "expected": [
+          "访客"
+        ],
+        "only_rec": true
+      }
+    },
+    "inverse": true,
+    "timeout": 3000,
+    "next": [
+      "识别总览"
+    ],
+    "on_error": [
+      "休息30秒"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 95,
+        "y": 162
+      }
+    }
+  },
+  "点击停靠": {
+    "recognition": {
+      "type": "DirectHit",
+      "param": {
+        "roi": "识别停靠"
+      }
+    },
+    "action": {
+      "type": "Click",
+      "param": {}
+    },
+    "$__mpe_code": {
+      "position": {
+        "x": 1826,
+        "y": 94
+      }
+    }
+  },
+  "识别停靠": {
+    "recognition": {
+      "type": "OCR",
+      "param": {
+        "roi": [
+          728,
+          28,
+          233,
+          318
+        ],
+        "expected": [
+          "停靠"
+        ]
+      }
+    },
+    "timeout": 500,
+    "next": [
+      "点击停靠"
+    ],
+    "on_error": [
+      "跑路-识别不到停靠，直接点击"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 1553,
+        "y": 189
+      }
+    }
+  },
+  "识别总览": {
+    "recognition": {
+      "type": "TemplateMatch",
+      "param": {
+        "roi": [
+          849,
+          347,
+          418,
+          121
+        ],
+        "template": [
+          "overview.png"
+        ],
+        "threshold": [
+          0.7
+        ]
+      }
+    },
+    "timeout": 2000,
+    "next": [
+      "打开总览"
+    ],
+    "on_error": [
+      "检测红白"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 398,
+        "y": 151
+      }
+    }
+  },
+  "跑路-点击军堡": {
+    "action": {
+      "type": "Click",
+      "param": {
+        "target": [
+          995,
+          63,
+          177,
+          48
+        ]
+      }
+    },
+    "post_wait_freezes": 300,
+    "next": [
+      "识别停靠"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 1261,
+        "y": 200
+      }
+    }
+  },
+  "跑路-识别不到停靠，直接点击": {
+    "action": {
+      "type": "Click",
+      "param": {
+        "target": [
+          754,
+          152,
+          158,
+          41
+        ]
+      }
+    },
+    "post_wait_freezes": 300,
+    "$__mpe_code": {
+      "position": {
+        "x": 1829,
+        "y": 265
+      }
+    }
+  },
+  "休息30秒": {
+    "post_delay": 30000,
+    "$__mpe_code": {
+      "position": {
+        "x": 390,
+        "y": 531
+      }
+    }
+  }
+}

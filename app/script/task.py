@@ -6,6 +6,7 @@ from maa.context import Context, Tasker
 
 from maa.toolkit import AdbDevice
 
+from app.maascript.AllInOne import AllInOneAction
 from app.maascript.OpenOverViewAction import OpenOverViewAction
 from app.maascript.RegionMergeRecognition import RegionMergeRecognition
 from app.script.device_utils import connect_device
@@ -40,6 +41,8 @@ class DeviceTaskThread(QThread):
             resource_path = "./assets/resource"
             resource.register_custom_recognition("RegionMergeRecognition", RegionMergeRecognition())
             resource.register_custom_action("OpenOverView", OpenOverViewAction())
+            resource.register_custom_action("AllInOne", AllInOneAction())
+
 
             res_job = resource.post_bundle(resource_path)
             res_job.wait()

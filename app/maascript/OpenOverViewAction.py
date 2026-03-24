@@ -26,5 +26,4 @@ class OpenOverViewAction(CustomAction):
             if x > 1100:
                 # Click at position (100, 100)
                 context.tasker.controller.post_click(x, y).wait()
-                return True
-        return False
+        return True
