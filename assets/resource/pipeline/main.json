@@ -4,28 +4,69 @@
             "filePath": "/Users/fengyifei02/PycharmProjects/maaeve/assets/resource/pipeline/main.json",
             "filename": "新建Pipeline1",
             "isModifiedExternally": false,
-            "lastSyncTime": 1773995647914,
+            "lastSyncTime": 1774353820803,
             "prefix": "",
             "savedViewport": {
-                "x": -279,
-                "y": 226,
-                "zoom": 1.5
+                "x": -232,
+                "y": 264,
+                "zoom": 0.91
             },
             "version": "v1.3.0"
         }
     },
-    "FindThreeImages": {
+    "安全": {
         "$__mpe_code": {
             "position": {
-                "x": -7,
-                "y": 0
+                "x": 1257,
+                "y": 69
+            }
+        }
+    },
+    "开始": {
+        "$__mpe_code": {
+            "position": {
+                "x": -231,
+                "y": 183
             }
         },
         "next": [
-            "MergeAndOCR"
+            "检测蹲站"
+        ],
+        "post_delay": 1000
+    },
+    "打开总览": {
+        "$__mpe_code": {
+            "position": {
+                "x": 683,
+                "y": 37
+            }
+        },
+        "action": {
+            "param": {
+                "custom_action": "OpenOverView",
+                "custom_action_param": "",
+                "target": "识别总览"
+            },
+            "type": "Custom"
+        },
+        "next": [
+            "检测红白"
+        ],
+        "post_delay": 300,
+        "pre_delay": 0
+    },
+    "检测红白": {
+        "$__mpe_code": {
+            "position": {
+                "x": 937,
+                "y": 282
+            }
+        },
+        "next": [
+            "安全"
         ],
         "on_error": [
-            "新建节点10"
+            "跑路-点击军堡"
         ],
         "recognition": {
             "param": {
@@ -52,80 +93,154 @@
             },
             "type": "And"
         },
-        "timeout": 1000
+        "timeout": 3000
     },
-    "MergeAndOCR": {
+    "检测蹲站": {
         "$__mpe_code": {
             "position": {
-                "x": 301,
-                "y": 114
+                "x": 97,
+                "y": 162
             }
         },
-        "next": [
-            "OCROnMerged"
-        ],
-        "recognition": {
-            "param": {
-                "custom_recognition": "RegionMergeRecognition"
-            },
-            "type": "Custom"
-        }
-    },
-    "OCROnMerged": {
-        "$__mpe_code": {
-            "position": {
-                "x": 652,
-                "y": 12
-            }
-        },
-        "next": [
-            "PrintOrcResult"
-        ],
         "on_error": [
-            "新建节点10"
+            "识别总览"
         ],
         "recognition": {
             "param": {
                 "expected": [
-                    "[0-9]+"
+                    "访客"
                 ],
-                "roi": "MergeAndOCR",
-                "threshold": 0.6
+                "roi": [
+                    1341,
+                    603,
+                    212,
+                    102
+                ]
             },
             "type": "OCR"
-        }
+        },
+        "timeout": 3000
     },
-    "PrintOrcResult": {
+    "点击停靠": {
         "$__mpe_code": {
             "position": {
-                "x": 301,
-                "y": 114
+                "x": 1826,
+                "y": 94
             }
+        },
+        "action": {
+            "param": {},
+            "type": "Click"
         },
         "recognition": {
             "param": {
-                "custom_recognition": "OutPutOrcResult"
+                "roi": "识别停靠"
             },
-            "type": "Custom"
+            "type": "DirectHit"
         }
     },
-    "新建节点10": {
+    "识别停靠": {
         "$__mpe_code": {
             "position": {
-                "x": 289,
-                "y": 309
+                "x": 1553,
+                "y": 189
+            }
+        },
+        "next": [
+            "点击停靠"
+        ],
+        "on_error": [
+            "跑路-识别不到停靠，直接点击"
+        ],
+        "recognition": {
+            "param": {
+                "expected": [
+                    "停靠"
+                ],
+                "roi": [
+                    980,
+                    38,
+                    233,
+                    147
+                ]
+            },
+            "type": "OCR"
+        },
+        "timeout": 500
+    },
+    "识别总览": {
+        "$__mpe_code": {
+            "position": {
+                "x": 398,
+                "y": 151
+            }
+        },
+        "next": [
+            "打开总览"
+        ],
+        "on_error": [
+            "检测红白"
+        ],
+        "recognition": {
+            "param": {
+                "roi": [
+                    1174,
+                    305,
+                    423,
+                    212
+                ],
+                "template": [
+                    "overview.png"
+                ],
+                "threshold": [
+                    0.8
+                ]
+            },
+            "type": "TemplateMatch"
+        },
+        "timeout": 2000
+    },
+    "跑路-点击军堡": {
+        "$__mpe_code": {
+            "position": {
+                "x": 1261,
+                "y": 200
             }
         },
         "action": {
             "param": {
                 "target": [
-                    95,
-                    26,
-                    40,
-                    29
+                    1284,
+                    75,
+                    135,
+                    33
                 ]
             },
             "type": "Click"
-        }
+        },
+        "next": [
+            "识别停靠"
+        ],
+        "post_wait_freezes": 300
+    },
+    "跑路-识别不到停靠，直接点击": {
+        "$__mpe_code": {
+            "position": {
+                "x": 1829,
+                "y": 265
+            }
+        },
+        "action": {
+            "param": {
+                "target": [
+                    1002,
+                    78,
+                    151,
+                    43
+                ]
+            },
+            "type": "Click"
+        },
+        "post_wait_freezes": 300
     }
 }

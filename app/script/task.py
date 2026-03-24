@@ -6,7 +6,7 @@ from maa.context import Context, Tasker
 
 from maa.toolkit import AdbDevice
 
-from app.maascript.OutPutOrcResult import PrintOrcResult
+from app.maascript.OpenOverViewAction import OpenOverViewAction
 from app.maascript.RegionMergeRecognition import RegionMergeRecognition
 from app.script.device_utils import connect_device
 from app.script.log import MaaTaskerEventSink, MaaControllerEventSink
@@ -39,7 +39,7 @@ class DeviceTaskThread(QThread):
             resource = Resource()
             resource_path = "./assets/resource"
             resource.register_custom_recognition("RegionMergeRecognition", RegionMergeRecognition())
-            resource.register_custom_recognition("OutPutOrcResult", PrintOrcResult())
+            resource.register_custom_action("OpenOverView", OpenOverViewAction())
 
             res_job = resource.post_bundle(resource_path)
             res_job.wait()
