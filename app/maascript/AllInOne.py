@@ -4,6 +4,8 @@ import os
 import cv2
 import time
 import logging
+import random
+from datetime import datetime
 
 from maa.pipeline import JRecognitionType, JOCR
 
@@ -13,6 +15,12 @@ from app.script.task_old import match_template, img1_grey, img2_grey, img3_grey,
 from app.script.sound import play_warn
 
 logger = logging.getLogger()
+
+# Debug 文件夹路径（项目根目录）
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+DEBUG_DIR = os.path.join(PROJECT_DIR, "debug")
+os.makedirs(DEBUG_DIR, exist_ok=True)
 
 
 class AllInOneAction(CustomAction):
@@ -43,6 +51,7 @@ class AllInOneAction(CustomAction):
         res1 = match_template(img_main_grey, img1_grey)
         res2 = match_template(img_main_grey, img2_grey)
         res3 = match_template(img_main_grey, img3_grey)
+
         if res1 is None or res2 is None or res3 is None:
             logger.info(adb_address + "跑路")
             play_warn()
@@ -62,7 +71,8 @@ class AllInOneAction(CustomAction):
                 img_main
             )
             if stop_at is not None and stop_at.best_result is not None and stop_at.best_result.box is not None:
-                click_at(controller, (stop_at.best_result.box.x, stop_at.best_result.box.y))
+                box = stop_at.best_result.box
+                click_roi(controller, (box.x, box.y, box.w, box.h))
                 time.sleep(1.5)
             else:
                 click_at(controller, (831, 91))
@@ -70,3 +80,19 @@ class AllInOneAction(CustomAction):
 
             time.sleep(2)
         return True
+
+
+    def saveImage(self, image):
+        """保存截图到 debug 文件夹
+        文件名格式: 年-月-日_时:分:秒:毫秒_4位随机数.png
+        """
+        # 生成文件名
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d_%H:%M:%S")
+        millis = now.strftime("%f")[:3]  # 毫秒前3位
+        rand = random.randint(1000, 9999)  # 4位随机数
+        filename = f"{timestamp}:{millis}_{rand}.png"
+
+        # 保存路径
+        filepath = os.path.join(DEBUG_DIR, filename)
+        cv2.imwrite(filepath, image)
