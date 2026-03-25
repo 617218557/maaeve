@@ -1,13 +1,16 @@
+import logging
 import os
 import cv2
 import time
 import random
 import numpy as np
 from maa.toolkit import AdbDevice
-from app.script.utils import play_warn
+
+from app.script.device_utils import click_at, click_roi
+from app.script.sound import play_warn
 
 
-
+logger = logging.getLogger()
 # 获取资源目录
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'assets', 'resource','image')
 # 匹配阈值
@@ -57,26 +60,13 @@ def match_template(img_main_thresh, template_thresh):
         return max_loc
     return None
 
-
-def click_at(controller, location):
-    """
-    点击指定位置
-    :param controller: 控制器
-    :param location: 位置 (x, y)
-    """
-    x, y = location
-    # 随机偏移，避免点击同一个位置
-    offset_x = random.randint(-10, 10)
-    offset_y = random.randint(-10, 10)
-    controller.post_click(x + offset_x, y + offset_y).wait()
-
 def run_battle_ship(controller):
     #导航 左侧导航
     #self.d.click(30 + ran, 200 + ran)
     #右侧军堡
-    click_at(controller, (1095, 83))
+    click_roi(controller, (995, 63, 177, 48))
     time.sleep(1)
-    click_at(controller, (831, 91))
+    click_roi(controller, (754, 152, 91, 10))
     time.sleep(1.5)
 
 
@@ -97,14 +87,8 @@ def battle(controller, device: AdbDevice):
     img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
     img_main_thresh = cv2.threshold(img_main_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-    res1 = match_template(img_main_grey, img1_grey)
-    res2 = match_template(img_main_grey, img2_grey)
-    res3 = match_template(img_main_grey, img3_grey)
-    # res4 = match_template(img_main_thresh, img_overview_thresh)
-    # res5 = match_template(img_main_thresh, img_visitor_thresh)
-
     if is_in_station(img_main_thresh):
-        # log("蹲站中", device, True)
+        logger.info(device.name + ": 蹲站中")
         time.sleep(30)
         return False
 
@@ -114,8 +98,14 @@ def battle(controller, device: AdbDevice):
         click_at(controller, loc_over_view)
         time.sleep(2)
 
+    res1 = match_template(img_main_grey, img1_grey)
+    res2 = match_template(img_main_grey, img2_grey)
+    res3 = match_template(img_main_grey, img3_grey)
+    # res4 = match_template(img_main_thresh, img_overview_thresh)
+    # res5 = match_template(img_main_thresh, img_visitor_thresh)
+
     if res1 is None or res2 is None or res3 is None:
-        # log("跑路", device, True)
+        logger.info(device.name + ": 跑路")
         play_warn()
         run_battle_ship(controller)
         time.sleep(3)

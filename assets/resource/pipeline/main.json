@@ -1,1 +1,47 @@
-{"$__mpe_config_新建Pipeline2":{"$__mpe_code":{"prefix":"","savedViewport":{"x":285,"y":133,"zoom":0.76},"filename":"新建Pipeline2","version":"v1.3.0"}},"开始":{"post_delay":1000,"next":["开始识别"],"$__mpe_code":{"position":{"x":-131,"y":233}}},"开始识别":{"action":{"type":"Custom","param":{"custom_action":"AllInOne"}},"timeout":-1,"$__mpe_code":{"position":{"x":225,"y":216}}}}
+{
+  "$__mpe_config_新建Pipeline2": {
+    "$__mpe_code": {
+      "prefix": "",
+      "lastSyncTime": 1774354168790,
+      "isModifiedExternally": false,
+      "filePath": "/Users/fengyifei02/PycharmProjects/maaeve/assets/resource/pipeline/main.json",
+      "savedViewport": {
+        "x": 974,
+        "y": 109,
+        "zoom": 0.91
+      },
+      "filename": "新建Pipeline2",
+      "version": "v1.3.0"
+    }
+  },
+  "开始": {
+    "post_delay": 1000,
+    "next": [
+      "开始识别"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": -131,
+        "y": 233
+      }
+    }
+  },
+  "开始识别": {
+    "action": {
+      "type": "Custom",
+      "param": {
+        "custom_action": "AllInOne"
+      }
+    },
+    "timeout": -1,
+    "next": [
+      "开始"
+    ],
+    "$__mpe_code": {
+      "position": {
+        "x": 216,
+        "y": 229
+      }
+    }
+  }
+}

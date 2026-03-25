@@ -53,6 +53,13 @@ class MonitorInterface(ScrollArea):
 
     def _on_maa_log(self, message, level):
         """MAA 日志回调 - 转发到主线程"""
+
+        # for address, thread in self.device_threads.items():
+        #     if address in message:
+        #         device = thread.device
+        #         message = message.replace(address, device.name)
+        #         break
+
         append_colored_log(self.log_view, message, level)
 
     def create_item_view(self):

@@ -12,6 +12,8 @@ from app.maascript.RegionMergeRecognition import RegionMergeRecognition
 from app.script.device_utils import connect_device
 from app.script.log import MaaTaskerEventSink, MaaControllerEventSink
 from app.script.task_maa import start_maa_task
+from app.script.task_old import battle
+
 
 class DeviceTaskThread(QThread):
     """设备任务线程"""
@@ -23,38 +25,35 @@ class DeviceTaskThread(QThread):
         super().__init__()
         self.device = device
         self._is_stopped = False
+        self.tasker = Tasker()
+        self.controller = None
+
+        # 加载资源
+        self.resource = Resource()
+        resource_path = "./assets/resource"
+        self.resource.register_custom_recognition("RegionMergeRecognition", RegionMergeRecognition())
+        self.resource.register_custom_action("OpenOverView", OpenOverViewAction())
+        self.resource.register_custom_action("AllInOne", AllInOneAction())
+        self.resource.post_bundle(resource_path).wait()
+
 
     def stop(self):
         """停止任务"""
         self._is_stopped = True
+        self.tasker.post_stop().wait()
 
     def run(self):
         try:
             # 连接设备
-            controller = connect_device(self.device)
-            if self._is_stopped:
-                self.stopped.emit(f"设备 {self.device.name} 已停止")
-                return
+            self.controller = connect_device(self.device)
 
-            # 加载资源
-            resource = Resource()
-            resource_path = "./assets/resource"
-            resource.register_custom_recognition("RegionMergeRecognition", RegionMergeRecognition())
-            resource.register_custom_action("OpenOverView", OpenOverViewAction())
-            resource.register_custom_action("AllInOne", AllInOneAction())
+            # self.tasker.add_sink(MaaTaskerEventSink(self.device))
+            # self.tasker.add_sink(MaaControllerEventSink(self.device))
+            self.tasker.bind(self.resource, self.controller)
+            start_maa_task(self.controller, self.tasker)
 
-
-            res_job = resource.post_bundle(resource_path)
-            res_job.wait()
-
-            tasker = Tasker()
-            tasker.add_sink(MaaTaskerEventSink(self.device))
-            tasker.add_sink(MaaControllerEventSink(self.device))
-            tasker.bind(resource, controller)
-
-            while not self._is_stopped:
-                start_maa_task(controller, tasker)
-                time.sleep(2)
+            # while not self._is_stopped:
+            #     battle(controller, self.device)
 
             self.stopped.emit(f"设备 {self.device.name} 已停止")
         except Exception as e:
