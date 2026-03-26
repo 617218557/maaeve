@@ -8,7 +8,7 @@ from maa.toolkit import AdbDevice
 
 from app.script.device_utils import click_at, click_roi
 from app.script.sound import play_warn
-from app.script.storage import settingsCfg
+from app.script.storage import settingsCfg, get_threshold
 
 logger = logging.getLogger()
 # 获取资源目录
@@ -54,7 +54,7 @@ def match_template(img_main_thresh, template_thresh):
     result = cv2.matchTemplate(img_main_thresh, template_thresh, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-    if max_val >= settingsCfg.get(settingsCfg.threshold):
+    if max_val >= get_threshold():
         return max_loc
     return None
 

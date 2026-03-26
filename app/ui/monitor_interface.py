@@ -174,13 +174,6 @@ class MonitorInterface(ScrollArea):
     def _on_task_callback(self, device, message):
         """任务回调处理"""
         append_colored_log(self.log_view, message, "INFO", device)
-        address = device.address
-        if address not in self.device_buttons:
-            return
-        start_btn, delete_btn = self.device_buttons[address]
-        self._reset_buttons(start_btn, delete_btn)
-        if address in self.device_threads:
-            del self.device_threads[address]
 
     def _stop_thread(self, device, start_btn, delete_btn):
         """停止线程"""

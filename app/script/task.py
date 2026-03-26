@@ -40,7 +40,7 @@ class DeviceTaskThread(QThread):
     def stop(self):
         """停止任务"""
         self._is_stopped = True
-        self.tasker.post_stop().wait()
+        self.tasker.post_stop()
 
     def run(self):
         try:
@@ -50,6 +50,7 @@ class DeviceTaskThread(QThread):
             # self.tasker.add_sink(MaaTaskerEventSink(self.device))
             # self.tasker.add_sink(MaaControllerEventSink(self.device))
             self.tasker.bind(self.resource, self.controller)
+            self.stopped.emit(f"设备 {self.device.name} 已开始")
             start_maa_task(self.controller, self.tasker)
 
             # while not self._is_stopped:

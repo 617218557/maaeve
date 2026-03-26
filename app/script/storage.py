@@ -142,3 +142,7 @@ def clear_screenshots():
         if filename.endswith('.png'):
             filepath = os.path.join(IMAGE_CACHE_DIR, filename)
             os.remove(filepath)
+
+
+def get_threshold() -> float:
+    return settingsCfg.get(settingsCfg.threshold) / 100

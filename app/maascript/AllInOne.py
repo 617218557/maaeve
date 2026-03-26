@@ -8,7 +8,7 @@ from maa.pipeline import JRecognitionType, JOCR
 
 from app.script.device_utils import click_at, click_roi
 from app.script.log import create_log_message
-from app.script.storage import settingsCfg, saveImage
+from app.script.storage import settingsCfg, saveImage, get_threshold
 from app.script.task_old import match_template, img1_grey, img2_grey, img3_grey, is_in_station, \
     run_battle_ship, img_overview_thresh
 from app.script.sound import play_warn
@@ -52,20 +52,21 @@ class AllInOneAction(CustomAction):
             time.sleep(1)
 
             # 识别停靠
+            img_main = controller.post_screencap().wait().get()
             stop_at = context.run_recognition_direct(
                 JRecognitionType.OCR,
                 JOCR(
                     expected=["停靠"],
                     roi=(728, 28, 233, 318),
-                    threshold=settingsCfg.get(settingsCfg.threshold)
+                    threshold=0.2
                 ),
                 img_main
             )
             if stop_at is not None and stop_at.best_result is not None and stop_at.best_result.box is not None:
                 box = stop_at.best_result.box
-                click_roi(controller, (box.x, box.y, box.w, box.h))
+                click_roi(controller, box)
             else:
-                click_at(controller, (831, 91))
+                click_roi(controller, [757, 71, 153, 49])
             if settingsCfg.get(settingsCfg.saveScreenshot):
                 saveImage(img_main)
             time.sleep(1.5)
