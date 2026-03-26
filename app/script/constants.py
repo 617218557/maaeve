@@ -1,4 +1,4 @@
 # 常量定义
 
-# 调试模式
-DEBUG_MODE = False
+KEY_LOG_ADB_ADDRESS = "adb_address"
+KEY_LOG_MESSAGE = "message"
