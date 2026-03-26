@@ -8,13 +8,11 @@ from maa.toolkit import AdbDevice
 
 from app.script.device_utils import click_at, click_roi
 from app.script.sound import play_warn
-
+from app.script.storage import settingsCfg
 
 logger = logging.getLogger()
 # 获取资源目录
 RESOURCE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'assets', 'resource','image')
-# 匹配阈值
-TEMPLATE_THRESHOLD = 0.9
 
 kernel = np.ones((2, 2), np.uint8)
 img1 = cv2.imread(RESOURCE_DIR + '/1.png')
@@ -56,7 +54,7 @@ def match_template(img_main_thresh, template_thresh):
     result = cv2.matchTemplate(img_main_thresh, template_thresh, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-    if max_val >= TEMPLATE_THRESHOLD:
+    if max_val >= settingsCfg.get(settingsCfg.threshold):
         return max_loc
     return None
 

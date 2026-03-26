@@ -1,9 +1,9 @@
 import logging
-
+import ast
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme, TextEdit
 
-from app.script.log import append_colored_log
+from app.script.log import append_colored_log, get_log_adb_address, get_log_message
 from app.script.storage import get_devices, delete_device
 from app.script.device_utils import find_devices
 from app.script.task import DeviceTaskThread
@@ -43,22 +43,25 @@ class MonitorInterface(ScrollArea):
         logging.getLogger().setLevel(logging.DEBUG)
 
         # 创建自定义 handler
-        handler = QtLogHandler(self._on_maa_log)
+        handler = QtLogHandler(self._on_log)
         handler.setLevel(logging.DEBUG)
-        handler.setFormatter(logging.Formatter('%(name)s - %(levelname)s - %(message)s'))
 
         # 添加 handler 到 root logger
         if not any(isinstance(h, QtLogHandler) for h in root_logger.handlers):
             root_logger.addHandler(handler)
 
-    def _on_maa_log(self, message, level):
-        """MAA 日志回调 - 转发到主线程"""
-
-        # for address, thread in self.device_threads.items():
-        #     if address in message:
-        #         device = thread.device
-        #         message = message.replace(address, device.name)
-        #         break
+    def _on_log(self, message, level):
+        """日志回调 - 转发到主线程"""
+        try:
+            dict_message = ast.literal_eval(message)
+            if isinstance(dict_message, dict):
+                for address, thread in self.device_threads.items():
+                    if address in get_log_adb_address(dict_message):
+                        device = thread.device
+                        message = device.name + ": " +get_log_message(dict_message)
+                        break
+        except (ValueError, SyntaxError) as e:
+            pass
 
         append_colored_log(self.log_view, message, level)
 
