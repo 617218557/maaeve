@@ -3,6 +3,7 @@ import ast
 from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, ListWidget, isDarkTheme, TextEdit
 
+from app.script.device_manager import device_manager
 from app.script.log import append_colored_log, get_log_adb_address, get_log_message
 from app.script.storage import get_devices, delete_device
 from app.script.device_utils import find_devices
@@ -14,7 +15,6 @@ class MonitorInterface(ScrollArea):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.log_view = None
-        self.device_threads = {}  # {address: thread}
         self.device_buttons = {}  # {address: (start_btn, delete_btn)}
         self.device_list_widget = None
 
@@ -55,11 +55,10 @@ class MonitorInterface(ScrollArea):
         try:
             dict_message = ast.literal_eval(message)
             if isinstance(dict_message, dict):
-                for address, thread in self.device_threads.items():
-                    if address in get_log_adb_address(dict_message):
-                        device = thread.device
-                        message = device.name + ": " +get_log_message(dict_message)
-                        break
+                device_info = device_manager.get_device(get_log_adb_address(dict_message))
+                if device_info and device_info.thread:
+                    device = device_info.thread.device
+                    message = device.name + ": " + get_log_message(dict_message)
         except (ValueError, SyntaxError) as e:
             pass
 
@@ -144,9 +143,12 @@ class MonitorInterface(ScrollArea):
         """切换设备启动/停止状态"""
         address = device.address
         start_btn, delete_btn = self.device_buttons.get(address, (button, button))
+        
+        # 获取设备信息
+        device_info = device_manager.get_device(address)
 
         # 停止设备
-        if address in self.device_threads and self.device_threads[address].isRunning():
+        if device_info and device_info.thread and device_info.thread.isRunning():
             self._stop_thread(device, start_btn, delete_btn)
             return
 
@@ -156,20 +158,25 @@ class MonitorInterface(ScrollArea):
             append_colored_log(self.log_view, "未找到设备", "ERROR", device)
             return
 
+        # 添加到设备管理器
+        device_manager.add_device(target_device)
+        device_info = device_manager.get_device(address)
+
         thread = DeviceTaskThread(target_device)
+        device_info.thread = thread
+
+        thread.info.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
         thread.finished.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
         thread.error.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
         thread.stopped.connect(lambda msg, dev=device: self._on_task_callback(dev, msg))
 
-        self.device_threads[address] = thread
+        append_colored_log(self.log_view, "正在启动设备", "SYSTEM", target_device)
         thread.start()
 
         # 更新按钮状态
         button.setText('停止')
         button.setIcon(FluentIcon.CLOSE)
         delete_btn.setEnabled(False)
-
-        append_colored_log(self.log_view, "正在启动设备", "SYSTEM", target_device)
 
     def _on_task_callback(self, device, message):
         """任务回调处理"""
@@ -178,14 +185,13 @@ class MonitorInterface(ScrollArea):
     def _stop_thread(self, device, start_btn, delete_btn):
         """停止线程"""
         address = device.address
-        thread = self.device_threads.get(address)
-        if thread:
+        device_info = device_manager.get_device(address)
+        if device_info and device_info.thread:
+            thread = device_info.thread
             thread.stop()
-            if not thread.wait(300):
-                thread.terminate()
-                thread.wait()
-            if address in self.device_threads:
-                del self.device_threads[address]
+            device_info.thread = None
+            device_info.isStartAi = False
+            device_manager.remove_device(device_info)
         self._reset_buttons(start_btn, delete_btn)
         append_colored_log(self.log_view, "已停止", "SYSTEM", device)
 
@@ -203,7 +209,8 @@ class MonitorInterface(ScrollArea):
         start_btn, delete_btn = self.device_buttons.get(address, (None, None))
 
         # 如果设备正在运行，先停止
-        if address in self.device_threads and self.device_threads[address].isRunning():
+        device_info = device_manager.get_device(address)
+        if device_info and device_info.thread and device_info.thread.isRunning():
             self._stop_thread(device, start_btn, delete_btn)
 
         if delete_device(device):

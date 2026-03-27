@@ -3,7 +3,6 @@ from PySide6.QtWidgets import QVBoxLayout, QLabel, QHBoxLayout, QWidget
 from qfluentwidgets import ScrollArea, FluentWidget, PushButton, FluentIcon, TitleLabel, BodyLabel, CardWidget, \
     ListWidget, isDarkTheme, LineEdit, SwitchButton, SwitchSettingCard, RangeSettingCard, PushSettingCard
 
-from app.script.device_utils import find_devices
 from app.script.storage import save_device, settingsCfg, clear_screenshots
 
 
@@ -60,7 +59,7 @@ class SettingsInterface(ScrollArea):
             icon=FluentIcon.PLAY,
             title="自动出站",
             content="占位 还没实现",
-            configItem=settingsCfg.autoExit
+            configItem=settingsCfg.autoStartAi
         )
         self.parent_layout.addWidget(auto_battle_card)
 

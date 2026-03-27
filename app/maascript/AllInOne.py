@@ -8,9 +8,9 @@ from maa.pipeline import JRecognitionType, JOCR
 
 from app.script.device_utils import click_at, click_roi
 from app.script.log import create_log_message
-from app.script.storage import settingsCfg, saveImage, get_threshold
+from app.script.storage import settingsCfg, saveImage, get_threshold, get_auto_start_ai
 from app.script.task_old import match_template, img1_grey, img2_grey, img3_grey, is_in_station, \
-    run_battle_ship, img_overview_thresh
+    run_battle_ship, img_overview_thresh, is_black_screen
 from app.script.sound import play_warn
 
 logger = logging.getLogger()
@@ -29,9 +29,22 @@ class AllInOneAction(CustomAction):
         img_main = controller.post_screencap().wait().get()
         img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
         img_main_thresh = cv2.threshold(img_main_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+
+        # 检测进出站中
+        if is_black_screen(img_main_thresh):
+            logger.info(create_log_message(adb_address, "进出站中"))
+            time.sleep(10)
+            return True
+
+        # 检测蹲站
         if is_in_station(img_main_thresh):
             logger.info(create_log_message(adb_address, "蹲站中"))
-            time.sleep(30)
+            if get_auto_start_ai():
+                #   打开ai
+                pass
+            else:
+                time.sleep(30)
+            return True
 
         # 打开总览
         loc_over_view = match_template(img_main_thresh, img_overview_thresh)

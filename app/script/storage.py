@@ -43,7 +43,7 @@ class SettingsStorage(QConfig):
     saveScreenshot = ConfigItem("Settings", "SaveScreenshot", False)
 
     # 自动出站
-    autoExit = ConfigItem("Settings", "AutoExit", False)
+    autoStartAi = ConfigItem("Settings", "AutoStartAi", False)
 
 
 # 设备实例
@@ -146,3 +146,6 @@ def clear_screenshots():
 
 def get_threshold() -> float:
     return settingsCfg.get(settingsCfg.threshold) / 100
+
+def get_auto_start_ai() -> bool:
+    return settingsCfg.get(settingsCfg.autoStartAi)

@@ -20,6 +20,7 @@ def connect_device(device: AdbDevice):
     controller.post_connection().wait()
     return controller
 
+
 # 点击区域内任意点
 def click_roi(controller, roi):
     """
@@ -33,6 +34,7 @@ def click_roi(controller, roi):
     click_y = y + random.randint(0, offset_y)
     # 执行点击
     controller.post_click(click_x, click_y).wait()
+
 
 def click_at(controller, location):
     """

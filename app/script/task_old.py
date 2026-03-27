@@ -75,6 +75,14 @@ def is_in_station(img_main):
         return True
     return False
 
+def is_black_screen(img_main_thresh) -> bool:
+    """检测是否在出\进站中"""
+    result_visitor = match_template(img_main_thresh, img_visitor_thresh)
+    result_overview = match_template(img_main_thresh, img_overview_thresh)
+    if result_visitor is None and result_overview is None:
+        return True
+    return False
+
 def battle(controller, device: AdbDevice):
     """
     执行战斗任务
