@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import time
 from typing import Optional, List
 
 from maa.toolkit import AdbDevice
@@ -12,6 +13,8 @@ class DeviceInfo:
     adbDevice: AdbDevice
     thread: Optional[DeviceTaskThread] = None
     isStartAi: bool = False
+    """ 上一次跑路时间 """
+    lastRunTime: int = 0
 
 
 class DeviceManager:
@@ -71,6 +74,26 @@ class DeviceManager:
             return True
         return False
 
+    def update_run_time(self, address: str) -> bool:
+        """更新指定设备的时间戳
+        :param address: 设备地址
+        :return: 是否更新成功
+        """
+        device_info = self.get_device(address)
+        if device_info:
+            device_info.lastRunTime = int(time.time() * 1000)
+            return True
+        return False
+
+    def get_run_time(self, address: str) -> int:
+        """更新指定设备的时间戳
+        :param address: 设备地址
+        :return: 是否更新成功
+        """
+        device_info = self.get_device(address)
+        if device_info:
+            return device_info.lastRunTime
+        return 0
 
 # 全局设备管理器实例
 device_manager = DeviceManager()

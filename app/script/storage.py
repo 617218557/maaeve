@@ -45,6 +45,8 @@ class SettingsStorage(QConfig):
     # 自动出站
     autoStartAi = ConfigItem("Settings", "AutoStartAi", False)
 
+    # 自动出站间隔
+    # autoStartAi = ConfigItem("Settings", "AutoStartAi", False)
 
 # 设备实例
 devicesCfg = DevicesStorage()

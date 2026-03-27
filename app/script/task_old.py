@@ -4,6 +4,7 @@ import cv2
 import time
 import random
 import numpy as np
+from maa.controller import Controller
 from maa.toolkit import AdbDevice
 
 from app.script.device_utils import click_at, click_roi
@@ -39,6 +40,9 @@ img_visitor = cv2.imread(RESOURCE_DIR + '/visitor.png')
 img_visitor_grey = cv2.cvtColor(img_visitor, cv2.COLOR_BGR2GRAY)
 img_visitor_thresh = cv2.threshold(img_visitor_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 # self.img_visitor_thresh = cv2.dilate(self.img_visitor_thresh, kernel, iterations=1)
+
+img_ai = cv2.imread(RESOURCE_DIR + '/ai.png')
+img_ai_grey = cv2.cvtColor(img_ai, cv2.COLOR_BGR2GRAY)
 
 
 def match_template(img_main_thresh, template_thresh):
@@ -82,6 +86,36 @@ def is_black_screen(img_main_thresh) -> bool:
     if result_visitor is None and result_overview is None:
         return True
     return False
+
+# 出站开启ai
+def out_station_with_ai(controller: Controller, last_run_time: int):
+    # 判断距离上次运行是否超过10分钟
+    current_time = int(time.time() * 1000)
+    if last_run_time > 0:
+        elapsed = current_time - last_run_time
+        wait_time = 10 * 60 * 1000 - elapsed
+        if wait_time > 0:
+            time.sleep(wait_time / 1000)  # 转换为秒
+
+    # TODO 出站按钮
+    click_roi(controller, (0, 0, 0, 0))
+    time.sleep(15)
+    # 重新获取截图
+    img_main = controller.post_screencap().wait().get()
+    img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
+    ai_icon_x, ai_icon_y = match_template(img_main_grey, img_ai_grey)
+    if ai_icon_x is None or ai_icon_y is None:
+        # TODO 点切换标签
+        click_roi(controller, (0, 0, 0, 0))
+        time.sleep(1)
+        img_main = controller.post_screencap().wait().get()
+        img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
+        ai_icon_x, ai_icon_y = match_template(img_main_grey, img_ai_grey)
+    ai_icon_width, ai_icon_height = img_ai_grey.shape[:2]
+    if ai_icon_x and ai_icon_y and ai_icon_width and ai_icon_height:
+        click_roi(controller, (ai_icon_x + ai_icon_width / 2, ai_icon_y + ai_icon_height / 2))
+        time.sleep(1)
+
 
 def battle(controller, device: AdbDevice):
     """
