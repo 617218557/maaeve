@@ -4,17 +4,7 @@ from typing import Optional, List
 
 from maa.toolkit import AdbDevice
 
-from app.script.task import DeviceTaskThread
-
-
-@dataclass
-class DeviceInfo:
-    """设备信息类"""
-    adbDevice: AdbDevice
-    thread: Optional[DeviceTaskThread] = None
-    isStartAi: bool = False
-    """ 上一次跑路时间 """
-    lastRunTime: int = 0
+from app.script.model.device_info import DeviceInfo
 
 
 class DeviceManager:

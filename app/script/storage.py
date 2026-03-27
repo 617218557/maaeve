@@ -45,8 +45,8 @@ class SettingsStorage(QConfig):
     # 自动出站
     autoStartAi = ConfigItem("Settings", "AutoStartAi", False)
 
-    # 自动出站间隔
-    # autoStartAi = ConfigItem("Settings", "AutoStartAi", False)
+    # 自动出站随机时间
+    autoStartTime = RangeConfigItem("Settings", "AutoStartTime", 10, RangeValidator(6, 60))
 
 # 设备实例
 devicesCfg = DevicesStorage()
@@ -151,3 +151,6 @@ def get_threshold() -> float:
 
 def get_auto_start_ai() -> bool:
     return settingsCfg.get(settingsCfg.autoStartAi)
+
+def get_auto_start_ai_time() -> int:
+    return settingsCfg.get(settingsCfg.autoStartTime) * 60 * 1000

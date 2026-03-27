@@ -2,17 +2,9 @@ from maa.toolkit import Toolkit, AdbDevice
 from maa.controller import AdbController
 import random
 from typing import Optional, List
-from dataclasses import dataclass, field
 from datetime import datetime
 
-
-@dataclass
-class DeviceInfo:
-    """设备信息类"""
-    adbDevice: AdbDevice
-    thread: Optional = None
-    isStartAi: bool = False
-    lastUpdateTime: datetime = field(default_factory=datetime.now)
+from app.script.model.device_info import DeviceInfo
 
 
 class DeviceManager:

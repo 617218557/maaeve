@@ -1,4 +1,5 @@
 from maa.toolkit import Toolkit
+from maa.context import Tasker
 
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
@@ -9,6 +10,7 @@ from qfluentwidgets import setTheme, Theme
 
 def main():
     Toolkit.init_option("./")
+    Tasker.set_save_on_error(False)
     # 创建应用实例
     app = QApplication(sys.argv)
     app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)

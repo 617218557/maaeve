@@ -1,3 +1,4 @@
+import threading
 import time
 
 from PySide6.QtCore import QThread, Signal
@@ -32,9 +33,12 @@ class DeviceTaskThread(QThread):
         """停止任务"""
         self._is_stopped = True
         if self.tasker and self.tasker.running:
-            self.tasker.post_stop()
+            threading.Thread(target=self.tasker.post_stop).start()
 
     def run(self):
+        if self._is_stopped:
+            self.stopped.emit(f"{self.device.name} 已停止")
+            return
         try:
             if self.resource is None:
                 self.info.emit(f"{self.device.name} 加载资源中")

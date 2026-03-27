@@ -9,7 +9,7 @@ from maa.toolkit import AdbDevice
 
 from app.script.device_utils import click_at, click_roi
 from app.script.sound import play_warn
-from app.script.storage import settingsCfg, get_threshold
+from app.script.storage import settingsCfg, get_threshold, get_auto_start_ai_time
 
 logger = logging.getLogger()
 # 获取资源目录
@@ -93,27 +93,25 @@ def out_station_with_ai(controller: Controller, last_run_time: int):
     current_time = int(time.time() * 1000)
     if last_run_time > 0:
         elapsed = current_time - last_run_time
-        wait_time = 10 * 60 * 1000 - elapsed
+        wait_time = get_auto_start_ai_time() - elapsed
         if wait_time > 0:
             time.sleep(wait_time / 1000)  # 转换为秒
 
-    # TODO 出站按钮
-    click_roi(controller, (0, 0, 0, 0))
+    click_roi(controller, (1095, 210, 146, 56))
     time.sleep(15)
     # 重新获取截图
     img_main = controller.post_screencap().wait().get()
     img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
     ai_icon_x, ai_icon_y = match_template(img_main_grey, img_ai_grey)
     if ai_icon_x is None or ai_icon_y is None:
-        # TODO 点切换标签
-        click_roi(controller, (0, 0, 0, 0))
+        click_roi(controller, (1216, 472, 38, 35))
         time.sleep(1)
         img_main = controller.post_screencap().wait().get()
         img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
         ai_icon_x, ai_icon_y = match_template(img_main_grey, img_ai_grey)
     ai_icon_width, ai_icon_height = img_ai_grey.shape[:2]
     if ai_icon_x and ai_icon_y and ai_icon_width and ai_icon_height:
-        click_roi(controller, (ai_icon_x + ai_icon_width / 2, ai_icon_y + ai_icon_height / 2))
+        click_roi(controller, (ai_icon_x, ai_icon_y, ai_icon_width, ai_icon_height))
         time.sleep(1)
 
 

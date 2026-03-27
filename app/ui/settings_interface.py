@@ -58,10 +58,18 @@ class SettingsInterface(ScrollArea):
         auto_battle_card = SwitchSettingCard(
             icon=FluentIcon.PLAY,
             title="自动出站",
-            content="占位 还没实现",
+            content="",
             configItem=settingsCfg.autoStartAi
         )
         self.parent_layout.addWidget(auto_battle_card)
+
+        auto_start_time_card = RangeSettingCard(
+            settingsCfg.autoStartTime,
+            FluentIcon.EDIT,
+            title="蹲站后随机多久出站",
+            content="上下随机5分钟"
+        )
+        self.parent_layout.addWidget(auto_start_time_card)
 
         clear_cache_card = PushSettingCard(
             text="清理缓存",
