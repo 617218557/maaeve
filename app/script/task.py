@@ -33,7 +33,11 @@ class DeviceTaskThread(QThread):
         """停止任务"""
         self._is_stopped = True
         if self.tasker and self.tasker.running:
-            threading.Thread(target=self.tasker.post_stop).start()
+            stop_thread = threading.Thread(
+                target=lambda: self.tasker.post_stop().wait()
+            )
+            stop_thread.daemon = True
+            stop_thread.start()
 
     def run(self):
         if self._is_stopped:

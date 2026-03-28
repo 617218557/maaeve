@@ -22,7 +22,6 @@ class DeviceManager:
             # 停止旧线程
             if existing.thread and existing.thread.isRunning():
                 existing.thread.stop()
-                existing.thread.wait(300)
             # 替换为新的 DeviceInfo
             existing.adbDevice = adb_device
             existing.thread = None

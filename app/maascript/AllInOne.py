@@ -22,6 +22,7 @@ class AllInOneAction(CustomAction):
             context: Context,
             argv: CustomAction.RunArg,
     ) -> bool:
+        print("1---------------------")
         controller = context.tasker.controller
         adb_address = controller.info.get("adb_serial")
         if adb_address is None:
@@ -30,10 +31,10 @@ class AllInOneAction(CustomAction):
         img_main = controller.post_screencap().wait().get()
         img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
         img_main_thresh = cv2.threshold(img_main_grey, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-
+        print("2")
         # 检测进出站中
         if is_black_screen(img_main_thresh):
-            logger.info(create_log_message(adb_address, "进出站中"))
+            logger.info(create_log_message(adb_address, "检测不到本地或者蹲站"))
             time.sleep(15)
             return True
 
@@ -46,7 +47,7 @@ class AllInOneAction(CustomAction):
             else:
                 time.sleep(30)
             return True
-
+        print("3")
         # 打开总览
         loc_over_view = match_template(img_main_thresh, img_overview_thresh)
         if loc_over_view is not None and loc_over_view[0] > 1100:
@@ -56,7 +57,7 @@ class AllInOneAction(CustomAction):
         res1 = match_template(img_main_grey, img1_grey)
         res2 = match_template(img_main_grey, img2_grey)
         res3 = match_template(img_main_grey, img3_grey)
-
+        print("4")
         if res1 is None or res2 is None or res3 is None:
             logger.info(create_log_message(adb_address, "跑路"))
             device_manager.update_run_time(adb_address)
@@ -73,7 +74,7 @@ class AllInOneAction(CustomAction):
                 JOCR(
                     expected=["停靠"],
                     roi=(728, 28, 233, 318),
-                    threshold=0.2
+                    threshold=0.7,
                 ),
                 img_main
             )
@@ -85,6 +86,7 @@ class AllInOneAction(CustomAction):
             if settingsCfg.get(settingsCfg.saveScreenshot):
                 saveImage(img_main)
             time.sleep(1.5)
+            print("5")
         return True
 
     # 出站开启ai
