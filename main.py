@@ -1,3 +1,5 @@
+import traceback
+
 from maa.toolkit import Toolkit
 from maa.context import Tasker
 
@@ -11,6 +13,14 @@ from qfluentwidgets import setTheme, Theme
 def main():
     Toolkit.init_option("./")
     Tasker.set_save_on_error(False)
+
+    # 全局崩溃处理函数
+    def handle_crash(exc_type, exc_value, exc_traceback):
+        print("程序崩溃啦！")
+        traceback.print_exception(exc_type, exc_value, exc_traceback)
+    # 安装全局钩子
+    sys.excepthook = handle_crash
+
     # 创建应用实例
     app = QApplication(sys.argv)
     app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)

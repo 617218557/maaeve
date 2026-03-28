@@ -87,33 +87,6 @@ def is_black_screen(img_main_thresh) -> bool:
         return True
     return False
 
-# 出站开启ai
-def out_station_with_ai(controller: Controller, last_run_time: int):
-    # 判断距离上次运行是否超过10分钟
-    current_time = int(time.time() * 1000)
-    if last_run_time > 0:
-        elapsed = current_time - last_run_time
-        wait_time = get_auto_start_ai_time() - elapsed
-        if wait_time > 0:
-            time.sleep(wait_time / 1000)  # 转换为秒
-
-    click_roi(controller, (1095, 210, 146, 56))
-    time.sleep(15)
-    # 重新获取截图
-    img_main = controller.post_screencap().wait().get()
-    img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
-    ai_icon_x, ai_icon_y = match_template(img_main_grey, img_ai_grey)
-    if ai_icon_x is None or ai_icon_y is None:
-        click_roi(controller, (1216, 472, 38, 35))
-        time.sleep(1)
-        img_main = controller.post_screencap().wait().get()
-        img_main_grey = cv2.cvtColor(img_main, cv2.COLOR_BGR2GRAY)
-        ai_icon_x, ai_icon_y = match_template(img_main_grey, img_ai_grey)
-    ai_icon_width, ai_icon_height = img_ai_grey.shape[:2]
-    if ai_icon_x and ai_icon_y and ai_icon_width and ai_icon_height:
-        click_roi(controller, (ai_icon_x, ai_icon_y, ai_icon_width, ai_icon_height))
-        time.sleep(1)
-
 
 def battle(controller, device: AdbDevice):
     """
